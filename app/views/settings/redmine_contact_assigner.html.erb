@@ -1,0 +1,12 @@
+<% issue_cfs = IssueCustomField.order(:name) %>
+<p>
+  <label for="plugin_redmine_contact_assigner_cf">
+    <%= l(:field_assigned_contact) %> (Custom Field)
+  </label>
+  <%= select_tag 'settings[assigned_contact_custom_field_id]',
+                 options_for_select(issue_cfs.map { |cf| ["#{cf.name} (##{cf.id})", cf.id] },
+                                    Setting.plugin_redmine_contact_assigner['assigned_contact_custom_field_id']),
+                 include_blank: true %>
+  <br/>
+  <em>Wähle das Issue-Custom-Field, das den Kontakt speichert.</em>
+</p>
