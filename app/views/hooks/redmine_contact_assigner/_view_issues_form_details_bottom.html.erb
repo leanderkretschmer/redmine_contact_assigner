@@ -10,14 +10,23 @@
 <% end %>
 
 <% cf_id = Setting.plugin_redmine_contact_assigner['assigned_contact_custom_field_id'] %>
+<% cf = cf_id.present? ? IssueCustomField.find_by(id: cf_id) : nil %>
 <div class="attributes">
   <p>
     <%= label_tag (cf_id ? "issue_custom_field_#{cf_id}" : nil), l(:field_assigned_contact) %>
     <% if cf_id.present? %>
       <% selected_value = issue.custom_field_value(cf_id) %>
-      <%= select_tag "issue[custom_field_values][#{cf_id}]",
-                     options_for_select([["", ""]] + contacts.map { |c| [c.name, c.id] }, selected_value),
-                     class: 'assigned-contact', data: { testid: 'assigned-contact-select' } %>
+      <% options = contacts.map { |c| [c.name, c.id] } %>
+      <% if cf&.multiple? %>
+        <%= select_tag "issue[custom_field_values][#{cf_id}][]",
+                       options_for_select(options, Array(selected_value)),
+                       multiple: true,
+                       class: 'assigned-contact', data: { testid: 'assigned-contact-select' } %>
+      <% else %>
+        <%= select_tag "issue[custom_field_values][#{cf_id}]",
+                       options_for_select([["", ""]] + options, selected_value),
+                       class: 'assigned-contact', data: { testid: 'assigned-contact-select' } %>
+      <% end %>
     <% else %>
       <span class="info">Bitte im Plugin-Setup ein Issue-Custom-Field auswählen.</span>
     <% end %>
