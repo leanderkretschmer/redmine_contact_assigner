@@ -27,8 +27,14 @@ module RedmineContactAssigner
       val = values[cf_id.to_s]
       return if val.nil?
 
-      current = issue.custom_field_values || {}
-      issue.custom_field_values = current.merge(cf_id.to_s => val)
+      current = issue.custom_field_values
+      if current.is_a?(Hash)
+        current[cf_id.to_s] = val
+        issue.custom_field_values = current
+      elsif current.respond_to?(:each)
+        cv = current.find { |c| (c.respond_to?(:custom_field_id) && c.custom_field_id.to_s == cf_id.to_s) || (c.respond_to?(:custom_field) && c.custom_field.id.to_s == cf_id.to_s) }
+        cv.value = val if cv && cv.respond_to?(:value=)
+      end
     end
   end
 end
