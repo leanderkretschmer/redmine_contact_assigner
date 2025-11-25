@@ -1,9 +1,7 @@
 module RedmineContactAssigner
   class Hooks < Redmine::Hook::ViewListener
-    def view_issues_form_details_bottom(context = {})
-      return '' unless context[:f]
-      context[:controller].send(:render_to_string, partial: 'hooks/redmine_contact_assigner/view_issues_form_details_bottom', locals: context)
-    end
+    render_on :view_issues_form_details_bottom,
+              partial: 'hooks/redmine_contact_assigner/view_issues_form_details_bottom'
 
     render_on :view_issues_show_details_bottom,
               partial: 'hooks/redmine_contact_assigner/view_issues_show_details_bottom'
