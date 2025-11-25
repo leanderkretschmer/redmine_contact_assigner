@@ -1,0 +1,27 @@
+<% issue = local_assigns[:issue] || @issue %>
+<% f = local_assigns[:f] %>
+<% project_id = issue&.project_id || @project&.id %>
+
+<% contacts = [] %>
+<% if project_id && defined?(Contact) %>
+  <% contacts = Contact.joins("INNER JOIN contacts_projects ON contacts_projects.contact_id = contacts.id")
+                       .where("contacts_projects.project_id = ?", project_id)
+                       .order(:last_name, :first_name) %>
+<% end %>
+
+<div class="attributes">
+  <p>
+    <%= f.label :assigned_contact_id, l(:field_assigned_contact) %>
+    <%= f.select :assigned_contact_id,
+                 options_for_select(contacts.map { |c| [c.name, c.id] }, issue.assigned_contact_id),
+                 { include_blank: true },
+                 { class: 'assigned-contact', data: { testid: 'assigned-contact-select' } } %>
+  </p>
+  <% if contacts.empty? %>
+    <p class="info"><%= l(:text_no_project_contacts) %></p>
+  <% end %>
+  <% if issue.errors[:assigned_contact_id].present? %>
+    <span class="error"><%= issue.errors[:assigned_contact_id].join(', ') %></span>
+  <% end %>
+  </div>
+
