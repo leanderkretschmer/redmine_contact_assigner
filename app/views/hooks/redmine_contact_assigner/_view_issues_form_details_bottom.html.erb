@@ -13,20 +13,52 @@
 <% cf = cf_id.present? ? IssueCustomField.find_by(id: cf_id) : nil %>
 <div class="attributes">
   <p>
-    <%= label_tag (cf_id ? "issue_custom_field_#{cf_id}" : nil), l(:field_assigned_contact) %>
+    <%= label_tag nil, l(:field_assigned_contact) %>
     <% if cf_id.present? %>
       <% selected_value = issue.custom_field_value(cf_id) %>
       <% options = contacts.map { |c| [c.name, c.id] } %>
-      <% if cf&.multiple? %>
-        <%= select_tag "issue[custom_field_values][#{cf_id}][]",
-                       options_for_select(options, Array(selected_value)),
-                       multiple: true,
-                       class: 'assigned-contact', data: { testid: 'assigned-contact-select' } %>
-      <% else %>
-        <%= select_tag "issue[custom_field_values][#{cf_id}]",
-                       options_for_select([["", ""]] + options, selected_value),
-                       class: 'assigned-contact', data: { testid: 'assigned-contact-select' } %>
-      <% end %>
+      <%= select_tag "contact_assigner_visible",
+                     options_for_select([["", ""]] + options, selected_value),
+                     class: 'assigned-contact', data: { testid: 'assigned-contact-select' } %>
+      <script>
+        (function() {
+          var cfId = '<%= cf_id %>';
+          function findOriginalField() {
+            var sel = document.querySelector('[name="issue[custom_field_values][' + cfId + ']"], [name="issue[custom_field_values][' + cfId + '][]"]');
+            return sel;
+          }
+          function syncToOriginal() {
+            var visible = document.querySelector('[name="contact_assigner_visible"]');
+            var orig = findOriginalField();
+            if (!visible || !orig) return;
+            var val = visible.value;
+            if (orig.multiple) {
+              Array.from(orig.options).forEach(function(o){ o.selected = (o.value === val); });
+            } else {
+              orig.value = val;
+            }
+          }
+          function init() {
+            var orig = findOriginalField();
+            var visible = document.querySelector('[name="contact_assigner_visible"]');
+            if (!orig || !visible) return;
+            // Hide original CF UI to avoid duplicate controls
+            var row = orig.closest('p, .attribute, .cf') || orig.parentElement;
+            if (row) { row.style.display = 'none'; }
+            // Initialize visible select from original value if any
+            if (orig.multiple) {
+              var selected = Array.from(orig.selectedOptions).map(function(o){ return o.value; });
+              visible.value = selected[0] || '';
+            } else {
+              visible.value = orig.value || '';
+            }
+            visible.addEventListener('change', syncToOriginal);
+          }
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+          } else { init(); }
+        })();
+      </script>
     <% else %>
       <span class="info">Bitte im Plugin-Setup ein Issue-Custom-Field auswählen.</span>
     <% end %>
