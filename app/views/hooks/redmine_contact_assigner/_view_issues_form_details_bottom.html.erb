@@ -13,12 +13,11 @@
 <% cf = cf_id.present? ? IssueCustomField.find_by(id: cf_id) : nil %>
 <div class="attributes">
   <p>
-    <%= f.label :assigned_contact_id, l(:field_assigned_contact) %>
+    <%= label_tag 'assigned_contact_id', l(:field_assigned_contact) %>
     <% selected_value = AssignedContact.where(issue_id: issue.id).pluck(:contact_id).first %>
-    <%= f.select :assigned_contact_id,
-                 options_for_select([["", ""]] + contacts.map { |c| [c.name, c.id] }, selected_value),
-                 {},
-                 { name: 'assigned_contact_id', class: 'assigned-contact', data: { testid: 'assigned-contact-select' } } %>
+    <%= select_tag 'assigned_contact_id',
+                   options_for_select([["", ""]] + contacts.map { |c| [c.name, c.id] }, selected_value),
+                   class: 'assigned-contact', data: { testid: 'assigned-contact-select' } %>
   </p>
   <% if contacts.empty? %>
     <p class="info"><%= l(:text_no_project_contacts) %></p>
