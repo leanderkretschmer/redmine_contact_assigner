@@ -1,7 +1,13 @@
 module RedmineContactAssigner
   class Hooks < Redmine::Hook::ViewListener
-    render_on :view_issues_form_details_bottom,
-              partial: 'hooks/redmine_contact_assigner/view_issues_form_details_bottom'
+    def view_issues_form_details_bottom(context = {})
+      return '' unless context[:f]
+      context[:controller].send(:render_to_string, partial: 'hooks/redmine_contact_assigner/view_issues_form_details_bottom', locals: context)
+    end
+
+    def view_issues_show_details_bottom(context = {})
+      context[:controller].send(:render_to_string, partial: 'hooks/redmine_contact_assigner/view_issues_show_details_bottom', locals: context)
+    end
 
     def controller_issues_new_before_save(context = {})
       upsert_assigned_contact(context)
