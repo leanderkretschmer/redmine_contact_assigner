@@ -1,14 +1,7 @@
 module RedmineContactAssigner
   class Hooks < Redmine::Hook::ViewListener
-    def view_issues_form_details_bottom(context = {})
-      controller = context[:controller]
-      return '' unless controller && %w[new create edit update].include?(controller.action_name)
-      return '' unless context[:f]
-      controller.send(:render_to_string, partial: 'hooks/redmine_contact_assigner/view_issues_form_details_bottom', locals: context)
-    end
-
-    render_on :view_issues_show_details_bottom,
-              partial: 'hooks/redmine_contact_assigner/view_issues_show_details_bottom'
+    render_on :view_issues_form_details_bottom,
+              partial: 'hooks/redmine_contact_assigner/view_issues_form_details_bottom'
 
     def controller_issues_new_before_save(context = {})
       upsert_assigned_contact(context)
