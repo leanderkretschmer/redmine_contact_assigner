@@ -3,6 +3,7 @@ if defined?(Rails) && Rails.respond_to?(:autoloaders) && Rails.autoloaders.respo
   Rails.autoloaders.main.push_dir(File.join(__dir__, 'lib'))
 end
 require_relative 'lib/redmine_contact_assigner/hooks'
+require_relative 'lib/redmine_contact_assigner/issue_patch'
 
 Redmine::Plugin.register :redmine_contact_assigner do
   name 'Redmine Contact Assigner'
@@ -14,4 +15,13 @@ Redmine::Plugin.register :redmine_contact_assigner do
   settings default: { 'assigned_contact_custom_field_id' => nil }, partial: 'settings/redmine_contact_assigner'
 end
 
-# Keine Schemaänderungen: Speicherung über bestehendes Issue-Custom-Field
+Issue.send(:include, RedmineContactAssigner::IssuePatch) unless Issue.included_modules.include?(RedmineContactAssigner::IssuePatch)
+
+if defined?(IssueQuery)
+  unless IssueQuery.available_columns.any? { |c| c.name == :assigned_contact_name }
+    IssueQuery.available_columns << QueryColumn.new(
+      :assigned_contact_name,
+      caption: :field_assigned_contact
+    )
+  end
+end
