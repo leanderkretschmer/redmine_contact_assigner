@@ -11,7 +11,7 @@
 
 <% cf_id = Setting.plugin_redmine_contact_assigner['assigned_contact_custom_field_id'] %>
 <% cf = cf_id.present? ? IssueCustomField.find_by(id: cf_id) : nil %>
-<p>
+<p style="clear: both;">
   <%= label_tag 'assigned_contact_id', l(:field_assigned_contact) %>
   <% selected_value = AssignedContact.where(issue_id: issue.id).pluck(:contact_id).first %>
   <%= select_tag 'assigned_contact_id',

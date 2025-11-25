@@ -1,9 +1,8 @@
 <% issue = local_assigns[:issue] || @issue %>
 <% rec = AssignedContact.where(issue_id: issue.id).first %>
 <% if rec && rec.contact %>
-<p>
+<p style="clear: both;">
   <span class="label"><%= l(:field_assigned_contact) %>:</span>
   <span><%= rec.contact.to_s %></span>
 </p>
 <% end %>
-
