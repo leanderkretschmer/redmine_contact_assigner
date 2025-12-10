@@ -17,9 +17,10 @@ end
 
 Issue.send(:include, RedmineContactAssigner::IssuePatch) unless Issue.included_modules.include?(RedmineContactAssigner::IssuePatch)
 
-if defined?(IssueQuery)
-  # Entferne die Spalte, falls sie bereits existiert (verhindert Dopplungen)
-  IssueQuery.available_columns.reject! { |c| c.name == :assigned_contact_name }
+if defined?(IssueQuery) && IssueQuery.respond_to?(:available_columns)
+  # Entferne vorhandene Einträge mit demselben Namen (verhindert Dopplungen)
+  existing_index = IssueQuery.available_columns.find_index { |c| c.name == :assigned_contact_name }
+  IssueQuery.available_columns.delete_at(existing_index) if existing_index
   # Füge die Spalte hinzu
   IssueQuery.available_columns << QueryColumn.new(
     :assigned_contact_name,
