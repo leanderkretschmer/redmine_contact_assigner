@@ -6,29 +6,34 @@ module RedmineContactAssigner
     render_on :view_issues_index_table_cell,
               partial: 'hooks/redmine_contact_assigner/view_issues_index_table_cell'
 
+    # Hook vor dem Speichern - setze den Parameter auf das Issue-Objekt
     def controller_issues_new_before_save(context = {})
-      upsert_assigned_contact(context)
+      set_assigned_contact_param(context)
     end
 
     def controller_issues_edit_before_save(context = {})
-      upsert_assigned_contact(context)
+      set_assigned_contact_param(context)
     end
 
     private
 
-    def upsert_assigned_contact(context)
+    def set_assigned_contact_param(context)
+      return unless defined?(Contact)
+      
       issue = context[:issue]
       params = context[:params]
       return if issue.nil? || params.nil?
 
-      ac_id = params[:assigned_contact_id]
-      if ac_id.present?
-        rec = AssignedContact.where(issue_id: issue.id).first_or_initialize
-        rec.contact_id = ac_id.to_i
-        rec.save
-      else
-        AssignedContact.where(issue_id: issue.id).delete_all
+      # Setze den Parameter auf das Issue-Objekt
+      # Der after_save Callback im IssuePatch wird dann die eigentliche Speicherung durchführen
+      if params[:assigned_contact_id].present?
+        issue.assigned_contact_id_param = params[:assigned_contact_id]
+      elsif params[:assigned_contact_id] == '' || params[:assigned_contact_id].nil?
+        issue.assigned_contact_id_param = ''
       end
+    rescue NameError, LoadError => e
+      # Contact-Plugin nicht verfügbar - ignoriere
+      Rails.logger.warn("RedmineContactAssigner: Contact-Plugin nicht verfügbar: #{e.message}")
     end
   end
 end

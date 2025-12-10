@@ -4,6 +4,7 @@ if defined?(Rails) && Rails.respond_to?(:autoloaders) && Rails.autoloaders.respo
 end
 require_relative 'lib/redmine_contact_assigner/hooks'
 require_relative 'lib/redmine_contact_assigner/issue_patch'
+require_relative 'lib/redmine_contact_assigner/query_patch'
 
 Redmine::Plugin.register :redmine_contact_assigner do
   name 'Redmine Contact Assigner'
@@ -16,6 +17,10 @@ Redmine::Plugin.register :redmine_contact_assigner do
 end
 
 Issue.send(:include, RedmineContactAssigner::IssuePatch) unless Issue.included_modules.include?(RedmineContactAssigner::IssuePatch)
+
+if defined?(IssueQuery)
+  IssueQuery.send(:include, RedmineContactAssigner::QueryPatch) unless IssueQuery.included_modules.include?(RedmineContactAssigner::QueryPatch)
+end
 
 if defined?(IssueQuery) && IssueQuery.respond_to?(:available_columns)
   # Entferne ALLE vorhandenen Einträge mit demselben Namen (verhindert Dopplungen)
