@@ -18,12 +18,14 @@ end
 Issue.send(:include, RedmineContactAssigner::IssuePatch) unless Issue.included_modules.include?(RedmineContactAssigner::IssuePatch)
 
 if defined?(IssueQuery) && IssueQuery.respond_to?(:available_columns)
-  # Entferne vorhandene Einträge mit demselben Namen (verhindert Dopplungen)
-  existing_index = IssueQuery.available_columns.find_index { |c| c.name == :assigned_contact_name }
-  IssueQuery.available_columns.delete_at(existing_index) if existing_index
-  # Füge die Spalte hinzu
+  # Entferne ALLE vorhandenen Einträge mit demselben Namen (verhindert Dopplungen)
+  IssueQuery.available_columns.delete_if { |c| c.name == :assigned_contact_name }
+  
+  # Füge die Spalte hinzu - sortierbar über einen Subquery
+  sortable_sql = "(SELECT contacts.last_name || ', ' || contacts.first_name FROM assigned_contacts INNER JOIN contacts ON contacts.id = assigned_contacts.contact_id WHERE assigned_contacts.issue_id = issues.id LIMIT 1)"
   IssueQuery.available_columns << QueryColumn.new(
     :assigned_contact_name,
-    caption: :field_assigned_contact
+    caption: :field_assigned_contact,
+    sortable: sortable_sql
   )
 end
