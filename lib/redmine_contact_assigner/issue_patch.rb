@@ -8,6 +8,10 @@ module RedmineContactAssigner
         def assigned_contact_name
           assigned_contact_contact&.to_s
         end
+        
+        def assigned_contact_id
+          assigned_contact_contact&.id
+        end
       end
     end
   end

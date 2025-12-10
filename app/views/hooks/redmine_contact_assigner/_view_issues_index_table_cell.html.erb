@@ -1,0 +1,11 @@
+<% column_name = local_assigns[:column]&.name || column&.name %>
+<% if column_name == :assigned_contact_name %>
+  <% issue_obj = local_assigns[:issue] || issue %>
+  <% contact = issue_obj.assigned_contact_contact %>
+  <% if contact.present? && defined?(Contact) %>
+    <%= link_to contact.to_s, contact_path(contact), class: 'contact' %>
+  <% else %>
+    <%= content_tag :span, issue_obj.assigned_contact_name %>
+  <% end %>
+<% end %>
+
